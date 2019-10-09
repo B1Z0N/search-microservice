@@ -36,6 +36,10 @@ public class ApiVerticle extends MicroserviceVerticle {
 
   // Private
 
+  /**
+   * Set our channels of communication using Config and Profile classes
+   * and codecs for them
+   */
   private void registerCodecs() {
     try {
       vertx.eventBus().registerDefaultCodec(Config.class, new ConfigMessageCodec());
@@ -43,6 +47,7 @@ public class ApiVerticle extends MicroserviceVerticle {
     } catch (IllegalStateException ignored) {}
   }
 
+  /** Listen on configuration changes and update API server accordingly */
   private void setupConfigListener() {
     vertx.eventBus().<Config>consumer(EBA_CONFIG_UPDATE, configAr -> {
       setupServer(configAr.body()).future().setHandler(serverAr -> {
@@ -67,6 +72,7 @@ public class ApiVerticle extends MicroserviceVerticle {
     fetchConfig(promise);
   }
 
+  /** Get config from eventbus and pass it to promise */
   private void fetchConfig(Promise<Config> promise) {
     vertx.eventBus().<Config>request(EBA_CONFIG_FETCH, new JsonObject(), configAr -> {
       if (configAr.failed()) {
@@ -92,6 +98,7 @@ public class ApiVerticle extends MicroserviceVerticle {
 
     mServer = VertxServerBuilder.forAddress(vertx, config.getEndpointHost(), Integer.parseInt(config.getEndpointPort()))
       .useTransportSecurity(certChainFile(config), privateKeyFile(config))
+      /** Important, adding service for retrieval of Profile data via gRPC*/
       .addService(new ProfileServiceImpl(vertx))
       .addService(ProtoReflectionService.newInstance())
       .build()

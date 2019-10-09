@@ -31,7 +31,6 @@ public class ProfileServiceImpl extends ProfileServiceGrpc.ProfileServiceImplBas
 
   // Public
 
-
   @Override
   public void getProfile(ProfileRequest request, StreamObserver<ProfileResponse> responseObserver) {
     mVertx.eventBus().request(EBA_PROFILE_FETCH, new JsonObject(), ar -> {

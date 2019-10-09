@@ -4,6 +4,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 import io.vertx.core.json.JsonObject;
 
+/** Class for transfering profile messages over EventBus */
 public class ProfileMessageCodec implements MessageCodec<Profile, Profile> {
 
   // Overrides

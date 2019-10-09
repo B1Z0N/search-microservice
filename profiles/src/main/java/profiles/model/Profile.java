@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
+/** Data class: representation of profile info in plain java class */
 public class Profile {
 
   // Constants
@@ -75,6 +76,7 @@ public class Profile {
 
   // Builder
 
+  /** Search `builder pattern` */
   public static class Builder {
 
     private final String mFirstName;
