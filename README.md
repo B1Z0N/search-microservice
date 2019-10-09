@@ -3,7 +3,7 @@ Starter pack for Vert.x development. Read a [wiki](https://github.com/IASA-HUB/v
 
 # Files
 
-There are some important for understanding of this project files. To main directories is `common` and `profiles`.
+There are some important files to understand this project. Two main directories is `common` and `profiles`.
 
 ## common
 
