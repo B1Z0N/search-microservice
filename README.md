@@ -1,6 +1,12 @@
 # vertx-starter-pack
 Starter pack for Vert.x development. Read a [wiki](https://github.com/IASA-HUB/vertx-starter-pack/wiki) for preparation.
 
+# Note about IDEA
+
+[Here](https://github.com/B1Z0N/java-basics/blob/master/README.md#idea-shortcuts) you could find some IDEA shortcuts that i've found the most useful(this list is being updated continuosly).
+
+Now let's dive in this project:
+
 # Files
 
 There are some important files to understand this project. Two main directories is `common` and `profiles`.
