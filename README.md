@@ -91,8 +91,8 @@ This part is all about useful links to understand `vert.x` and this project of c
 ## Other
 
 - What is REST - [part 1](https://medium.com/extend/what-is-rest-a-simple-explanation-for-beginners-part-1-introduction-b4a072f8740f) and [part 2](https://medium.com/extend/what-is-rest-a-simple-explanation-for-beginners-part-2-rest-constraints-129a4b69a582)
-- What is `[gRPC]`(https://grpc.io/docs/guides/)?
-- What is `[SSL]`(https://www.digicert.com/ssl/)(`TLS` is just a successor of `SSL`)?
+- What is [`gRPC`](https://grpc.io/docs/guides/)?
+- What is [`SSL`](https://www.digicert.com/ssl/)(`TLS` is just a successor of `SSL`)?
 
 ---
 
