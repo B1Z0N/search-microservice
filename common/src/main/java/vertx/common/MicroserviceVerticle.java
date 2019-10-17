@@ -19,6 +19,13 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Class that defines common verticle's methods to be reused in our future
+ * verticles by inheriting from it.
+ * Read more to understand code: https://vertx.io/docs/vertx-service-discovery/java/
+ *
+ * Inheriting from AbstractVerticle to gain access to vertx instance
+ */
 public class MicroserviceVerticle extends AbstractVerticle {
 
   // Variables
@@ -28,33 +35,61 @@ public class MicroserviceVerticle extends AbstractVerticle {
 
   // Overrides
 
-  @Override
-  public void stop(Promise<Void> stopFuture) {
-    List<Promise> promises = mRegisteredRecords
-      .stream()
-      .map(this::unpublish)
-      .collect(Collectors.toList());
-
-    if (promises.isEmpty()) {
-      stopDiscovery(stopFuture);
-    } else {
-      stopServices(promises, stopFuture);
-    }
+  /**
+   * Initialize our ServiceDiscovery object - an instrument
+   * to publish and discover various resources
+   */
+  protected void createServiceDiscovery() {
+    JsonObject config = config();
+    ServiceDiscoveryOptions opts = new ServiceDiscoveryOptions()
+            .setBackendConfiguration(config);
+    mDiscovery = ServiceDiscovery.create(vertx, opts);
   }
 
-  // Public
+  /**
+   * Publish record - way of describing a service
+   */
+  private void publish(Record record, Handler<AsyncResult<Void>> completion) {
+    mDiscovery.publish(record, ar -> {
+      if (ar.succeeded()) mRegisteredRecords.add(record);
 
+      completion.handle(ar.map((Void)null));
+    });
+  }
+
+
+  // Public
+  /**
+   * Http service
+   *
+   * @param endpoint the service name
+   * @param host the service address
+   * @param port the service port
+   * @param completion function to call upon completion
+   * the same logic applies to other methods starting with publish
+   */
   protected void publishHttpEndpoint(String endpoint, String host, int port, Handler<AsyncResult<Void>> completion) {
     JsonObject filter = new JsonObject()
       .put("name", endpoint);
     mDiscovery.getRecord(filter, ar -> {
+      /** if there are no service with this name running */
       if (!ar.succeeded() || ar.result() == null) {
+        /** create record to describe this service */
         Record record = HttpEndpoint.createRecord(endpoint, host, port, "/");
+        /** and publish the service */
         publish(record, completion);
       }
     });
+
   }
 
+  /**
+   * MessageSource - for sharing messages
+   *
+   * @param name the service name
+   * @param address the service address
+   * @param completionHandler function to call upon completion
+   */
   protected void publishMessageSource(String name, String address, Handler<AsyncResult<Void>> completionHandler) {
     JsonObject filter = new JsonObject()
       .put("name", name);
@@ -66,6 +101,15 @@ public class MicroserviceVerticle extends AbstractVerticle {
     });
   }
 
+  /**
+   * MessageSource - for sharing messages in different formats and ways,
+   * like JSon or just plain Java class
+   *
+   * @param name the service name
+   * @param address the service address
+   * @param contentClass type of data to be sent
+   * @param completionHandler function to call upon completion
+   */
   protected void publishMessageSource(String name, String address, Class<?> contentClass, Handler<AsyncResult<Void>> completionHandler) {
     JsonObject filter = new JsonObject()
       .put("name", name);
@@ -77,6 +121,14 @@ public class MicroserviceVerticle extends AbstractVerticle {
     });
   }
 
+  /**
+   * Event bus services are service proxies(read here: https://avinetworks.com/glossary/service-proxy/)
+   *
+   * @param name the service name
+   * @param address the service address
+   * @param serviceClass service interface(like MyService.class)
+   * @param completionHandler function to call upon completion
+   */
   protected void publishEventBusService(String name, String address, Class<?> serviceClass, Handler<AsyncResult<Void>> completionHandler) {
     JsonObject filter = new JsonObject()
       .put("name", name);
@@ -92,8 +144,8 @@ public class MicroserviceVerticle extends AbstractVerticle {
     return mDiscovery;
   }
 
-  // Private
 
+  // Private
   protected void createHealthCheck() {
     HealthChecks hc = HealthChecks.create(vertx);
     hc.register("Microservice", 5000, future -> future.complete(Status.OK()));
@@ -112,21 +164,6 @@ public class MicroserviceVerticle extends AbstractVerticle {
       });
   }
 
-  protected void createServiceDiscovery() {
-    JsonObject config = config();
-    ServiceDiscoveryOptions opts = new ServiceDiscoveryOptions()
-      .setBackendConfiguration(config);
-    mDiscovery = ServiceDiscovery.create(vertx, opts);
-  }
-
-  private void publish(Record record, Handler<AsyncResult<Void>> completion) {
-    mDiscovery.publish(record, ar -> {
-      if (ar.succeeded()) mRegisteredRecords.add(record);
-
-      completion.handle(ar.map((Void)null));
-    });
-  }
-
   private Promise<Void> unpublish(Record record) {
     mRegisteredRecords.remove(record);
 
@@ -136,17 +173,35 @@ public class MicroserviceVerticle extends AbstractVerticle {
     return unregisteringFuture;
   }
 
+  @Override
+  public void stop(Promise<Void> stopFuture) {
+    List<Promise> promises = mRegisteredRecords
+            .stream()
+            .map(this::unpublish)
+            .collect(Collectors.toList());
+
+    if (promises.isEmpty()) {
+      stopDiscovery(stopFuture);
+    } else {
+      stopServices(promises, stopFuture);
+    }
+  }
+
   private void stopDiscovery(Promise<Void> stopPromise) {
     mDiscovery.close();
     stopPromise.complete();
   }
 
   private void stopServices(List<Promise> promises, Promise<Void> stopPromise) {
+    /** Promise is an action to be performed, or already performed */
     List<Future> futures = promises
       .stream()
       .map((Function<Promise, Future>) Promise::future)
       .collect(Collectors.toList());
 
+    /** Future is the result of this action, you could use it to set
+     *  a handler that will be invoked after action performs
+     */
     CompositeFuture.all(futures)
       .setHandler(ar -> {
         mDiscovery.close();

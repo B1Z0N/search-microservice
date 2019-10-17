@@ -6,6 +6,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
+
+/** see common/src/main/java/vertx/common/Launcher.java comments */
 public class Launcher extends vertx.common.Launcher {
 
   public static void main(String[] args) {
@@ -22,6 +24,7 @@ public class Launcher extends vertx.common.Launcher {
     ClusterManager mgr = new HazelcastClusterManager();
     options.setClusterManager(mgr);
 
+    /** enable clustering and trust all server certificates */
     options.getEventBusOptions()
       .setClustered(true)
       .setTrustAll(true);

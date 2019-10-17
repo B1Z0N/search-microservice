@@ -3,6 +3,7 @@ package profiles.model;
 import io.vertx.core.json.JsonObject;
 import javax.annotation.Nonnull;
 
+/** Data class: representation of conf/config.json in plain java class */
 public class Config {
 
   // Constants

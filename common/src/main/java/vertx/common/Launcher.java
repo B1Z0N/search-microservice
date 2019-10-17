@@ -1,8 +1,14 @@
+
 package vertx.common;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * Class that launches vertx instance.
+ * Command line arguments are: 'run profiles.verticles.MainVerticle -cluster'.
+ * Go to profiles/src/main/java/profiles/verticles/MainVerticle.java to see running verticle
+ */
 public class Launcher extends io.vertx.core.Launcher {
 
   // Main
@@ -28,3 +34,6 @@ public class Launcher extends io.vertx.core.Launcher {
     options.setConfig(new JsonObject());
   }
 }
+
+
+

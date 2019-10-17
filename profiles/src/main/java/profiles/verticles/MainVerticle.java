@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/** Verticle that deploys all other verticles */
 public class MainVerticle extends MicroserviceVerticle {
 
   // Variables

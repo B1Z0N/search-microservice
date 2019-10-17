@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 
 import static profiles.verticles.ProfilesVerticle.EBA_PROFILE_FETCH;
 
+/** Service for getting profile from vert.x */
 public class ProfileServiceImpl extends ProfileServiceGrpc.ProfileServiceImplBase {
 
   // Variables
@@ -25,13 +26,14 @@ public class ProfileServiceImpl extends ProfileServiceGrpc.ProfileServiceImplBas
 
   // Constructors
 
+  /** Set custom vert.x instance */
   public ProfileServiceImpl(@Nonnull Vertx vertx) {
     mVertx = vertx;
   }
 
   // Public
 
-
+  /** Get Profile response from vert.x */
   @Override
   public void getProfile(ProfileRequest request, StreamObserver<ProfileResponse> responseObserver) {
     mVertx.eventBus().request(EBA_PROFILE_FETCH, new JsonObject(), ar -> {
@@ -51,6 +53,7 @@ public class ProfileServiceImpl extends ProfileServiceGrpc.ProfileServiceImplBas
 
   // Private
 
+  /** Transform Profile object to ProfileResponse */
   private ProfileResponse transformToProfileResponse(Profile profile) {
     ProfileObject profileObject = ProfileObject.newBuilder()
       .setFirstName(profile.getFirstName())

@@ -4,6 +4,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 import io.vertx.core.json.JsonObject;
 
+/** Class for transfering config messages over EventBus */
 public class ConfigMessageCodec implements MessageCodec<Config, Config> {
 
   @Override

@@ -12,6 +12,7 @@ import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
+/** Verticle that replies to Profile requests */
 public class ProfilesVerticle extends MicroserviceVerticle {
 
   // Constants

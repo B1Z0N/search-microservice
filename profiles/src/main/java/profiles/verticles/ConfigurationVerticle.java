@@ -8,6 +8,7 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
+/** Verticle for configuration maintenance update/retrieval */
 public class ConfigurationVerticle extends MicroserviceVerticle {
 
   // Constants
@@ -36,7 +37,6 @@ public class ConfigurationVerticle extends MicroserviceVerticle {
       vertx.eventBus().registerDefaultCodec(Config.class, new ConfigMessageCodec());
     } catch (IllegalStateException ignored) {}
   }
-
 
   private void setupRetriever(Promise<Void> startPromise) {
     ConfigRetriever retriever = ConfigRetriever.create(vertx);

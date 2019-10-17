@@ -4,7 +4,7 @@ import vertx.common.MicroserviceVerticle;
 import io.vertx.core.Promise;
 import io.vertx.ext.web.Router;
 import io.vertx.servicediscovery.rest.ServiceDiscoveryRestEndpoint;
-
+/** https://vertx.io/docs/vertx-service-discovery/java/ */
 public class ServiceDiscoveryVerticle extends MicroserviceVerticle {
 
   // Constants

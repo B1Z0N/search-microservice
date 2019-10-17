@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
 import java.io.File;
 
+/** Client that connects to our server and prints response */
 public class ProfilesClient {
 
   // Constants
@@ -29,18 +30,35 @@ public class ProfilesClient {
   // Main
 
   public static void main(String[] args) {
+    /** Getting JSon object from file conf/config.json */
     getRetriever(configPath).getConfig(ar -> {
       if (ar.failed()) throw new RuntimeException("Configuration failed: " + ar.cause().getMessage());
 
+      /**
+       * Transforming it's configuration to a data class
+       * (located in profiles/src/main/java/profiles/model/Config.java)
+       */
       Config config = new Config(ar.result());
+      /**
+       * Connect to server via gRPC, stub is just a synonym of client
+       * (read https://grpc.io/docs/guides/ for more info)
+       */
       ProfileServiceGrpc.ProfileServiceBlockingStub stub = getService(config);
 
       try {
+        /** prepare request */
         ProfileRequest request = ProfileRequest
           .newBuilder()
           .setId("some id")
           .build();
 
+        /**
+         * send it and get the answer, the path is:
+         * ProfilesServiceImpl(sends request via .getProfile) ->
+         *    ProfilesVerticle(giving response with "Ivanov" ...)
+         *
+         * API verticle settled service ProfileServiceImpl on start.
+         */
         ProfileObject profile = stub
           .getProfile(request)
           .getProfile();
