@@ -24,6 +24,10 @@ subprojects {
 
     dependencies {
         compile group: "io.vertx", name: "vertx-core", version: "${vertxVersion}"
+
+        // kafka client
+
+        compile 'io.vertx:vertx-kafka-client:3.8.4'
     }
 
     def generatedJavaOutputDir = "${buildDir.absolutePath}/generated/"
