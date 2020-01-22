@@ -1,60 +1,63 @@
 package profiles.model;
 
 import io.vertx.core.json.JsonObject;
+
 import javax.annotation.Nonnull;
 
-/** Data class: representation of conf/config.json in plain java class */
+/**
+ * Data class: representation of conf/config.json in plain java class
+ */
 public class Config {
 
   // Constants
 
-  private static final String ENDPOINT = "endpoint";
-  private static final String ENDPOINT_HOST = "host";
-  private static final String ENDPOINT_PORT = "port";
-  private static final String TLS = "tls";
-  private static final String TLS_CERT_CHAIN = "cert_chain";
-  private static final String TLS_PRIV_KEY = "priv_key";
-  private static final String TLS_CA = "ca";
+  private static final String KAFKA = "kafka";
+  private static final String KAFKA_HOST = "host";
+  private static final String KAFKA_PORT = "port";
+  private static final String GEO_SEARCH_TOPIC = "geoSearchTopic";
+  private static final String TAG_SEARCH_TOPIC = "tagSearchTopic";
+  private static final String GEO_OUTPUT_TOPIC = "geoOutputTopic";
+  private static final String TAG_OUTPUT_TOPIC = "tagOutputTopic";
 
   // Variables
 
   private final JsonObject mConfigObject;
-  private final String mEndpointHost;
-  private final String mEndpointPort;
-  private final String mTlsCertChain;
-  private final String mTlsPrivKey;
-  private final String mTlsCa;
+
+  private final String mKafkaHost;
+  private final String mKafkaPort;
+  private final String mGeoSearchTopic;
+
+  private final String mTagSearchTopic;
+  private final String mGeoOutputTopic;
+  private final String mTagOutputTopic;
 
   // Constructors
 
   public Config(@Nonnull JsonObject config) {
     mConfigObject = config;
 
-    JsonObject endpoint = config.getJsonObject(ENDPOINT);
-    mEndpointHost = endpoint.getString(ENDPOINT_HOST);
-    mEndpointPort = endpoint.getString(ENDPOINT_PORT);
-
-    JsonObject tls = config.getJsonObject(TLS);
-    mTlsCertChain = tls.getString(TLS_CERT_CHAIN);
-    mTlsPrivKey = tls.getString(TLS_PRIV_KEY);
-    mTlsCa = tls.getString(TLS_CA);
+    JsonObject kafka = config.getJsonObject(KAFKA);
+    mKafkaHost = kafka.getString(KAFKA_HOST);
+    mKafkaPort = kafka.getString(KAFKA_PORT);
+    mGeoSearchTopic = kafka.getString(GEO_SEARCH_TOPIC);
+    mTagSearchTopic = kafka.getString(TAG_SEARCH_TOPIC);
+    mGeoOutputTopic = kafka.getString(GEO_OUTPUT_TOPIC);
+    mTagOutputTopic = kafka.getString(TAG_OUTPUT_TOPIC);
   }
 
   // Public
 
-  public JsonObject toJson() {
-    JsonObject endpoint = new JsonObject()
-      .put(ENDPOINT_HOST, mEndpointHost)
-      .put(ENDPOINT_PORT, mEndpointPort);
-
-    JsonObject tls = new JsonObject()
-      .put(TLS_CERT_CHAIN, mTlsCertChain)
-      .put(TLS_PRIV_KEY, mTlsPrivKey)
-      .put(TLS_CA, mTlsCa);
+  JsonObject toJson() {
+    JsonObject kafka = new JsonObject()
+            .put(KAFKA_HOST, mKafkaHost)
+            .put(KAFKA_PORT, mKafkaPort)
+            .put(GEO_SEARCH_TOPIC, mGeoSearchTopic)
+            .put(TAG_SEARCH_TOPIC, mTagSearchTopic)
+            .put(GEO_OUTPUT_TOPIC, mGeoOutputTopic)
+            .put(TAG_OUTPUT_TOPIC, mTagOutputTopic);
 
     return new JsonObject()
-      .put(ENDPOINT, endpoint)
-      .put(TLS, tls);
+            .put(KAFKA, kafka);
   }
 
   // Accessors
@@ -63,36 +66,27 @@ public class Config {
     return mConfigObject;
   }
 
-  public String getEndpointHost() {
-    return mEndpointHost;
+  public String getKafkaHost() {
+    return mKafkaHost;
   }
 
-  public String getEndpointPort() {
-    return mEndpointPort;
+  public String getKafkaPort() {
+    return mKafkaPort;
   }
 
-  public String getTlsCertChain() {
-    return mTlsCertChain;
+  public String getGeoSearchTopic() {
+    return mGeoSearchTopic;
   }
 
-  public String getTlsPrivKey() {
-    return mTlsPrivKey;
+  public String getTagSearchTopic() {
+    return mTagSearchTopic;
   }
 
-  public String getTlsCa() {
-    return mTlsCa;
+  public String getGeoOutputTopic() {
+    return mGeoOutputTopic;
   }
 
-  // Utils
-
-  @Override
-  public String toString() {
-    return "Config{" +
-      "mEndpointHost='" + mEndpointHost + '\'' +
-      ", mEndpointPort=" + mEndpointPort +
-      ", mTlsCertChain='" + mTlsCertChain + '\'' +
-      ", mTlsPrivKey='" + mTlsPrivKey + '\'' +
-      ", mTlsCa='" + mTlsCa + '\'' +
-      '}';
+  public String getTagOutputTopic() {
+    return mTagOutputTopic;
   }
 }
