@@ -1,11 +1,10 @@
 {
-  "endpoint": {
-    "host": "0.0.0.0",
-    "port": "50051"
-  },
-  "tls": {
-    "cert_chain": "ssl/server.crt",
-    "priv_key": "ssl/server.pem",
-    "ca": "ssl/ca.crt"
+  "kafka" : {
+    "host" : "10.50.5.1",
+    "port" : "9092",
+    "geoSearchTopic" : "geoSearchRequestTopic",
+    "tagSearchTopic" : "tagSearchRequestTopic",
+    "geoOutputTopic" : "geoSearchOutputTopic",
+    "tagOutputTopic" : "tagSearchOutputTopic"
   }
 }
