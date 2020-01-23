@@ -1,28 +1,20 @@
-package scales.verticles;
+package profiles.verticles;
 
-import io.vertx.kafka.client.common.TopicPartition;
 import io.vertx.kafka.client.consumer.KafkaConsumer;
 import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
-import scales.model.Config;
-import scales.model.ConfigMessageCodec;
-import scales.model.OriginID;
-import scales.model.OriginID.photoType;
-import scales.model.OriginIDCodec;
-
-import io.vertx.kafka.client.common.TopicPartition;
-import io.vertx.kafka.client.consumer.KafkaConsumer;
-import io.vertx.kafka.client.producer.KafkaProducer;
-import io.vertx.kafka.client.producer.KafkaProducerRecord;
-
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
-import io.vertx.kafka.client.common.TopicPartition;
-import io.vertx.kafka.client.consumer.KafkaConsumer;
-import io.vertx.kafka.client.producer.KafkaProducer;
-import io.vertx.kafka.client.producer.KafkaProducerRecord;
+import org.apache.http.HttpHost;
+import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.*;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import profiles.model.Config;
 import profiles.model.ConfigMessageCodec;
+
+import io.vertx.core.json.JsonArray;
 
 import vertx.common.MicroserviceVerticle;
 import io.vertx.core.Promise;
@@ -31,10 +23,9 @@ import io.vertx.core.json.JsonObject;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-import static scales.verticles.ConfigurationVerticle.EBA_CONFIG_FETCH;
-import static scales.verticles.ConfigurationVerticle.EBA_CONFIG_UPDATE;
-import static scales.verticles.ScaleVerticle.EBA_DELETE_ORIGIN;
-import static scales.verticles.ScaleVerticle.EBA_SCALE_ORIGIN;
+import static profiles.verticles.ConfigurationVerticle.EBA_CONFIG_FETCH;
+import static profiles.verticles.ConfigurationVerticle.EBA_CONFIG_UPDATE;
+
 
 // verticle for communicating with kafka and internal implementation
 public class ApiVerticle extends MicroserviceVerticle {
@@ -53,6 +44,9 @@ public class ApiVerticle extends MicroserviceVerticle {
 
   private String mGeoIndex;
   private String mTagIndex;
+
+
+  private RestHighLevelClient mElasticClient;
 
   // Overrides
 
@@ -73,13 +67,23 @@ public class ApiVerticle extends MicroserviceVerticle {
     mTagSearchTopic = config.getTagSearchTopic();
     mGeoOutputTopic = config.getGeoOutputTopic();
     mTagOutputTopic = config.getTagOutputTopic();
+    mGeoIndex = config.getGeoIndex();
+    mTagIndex = config.getTagIndex();
 
     if (mConsumer != null) mConsumer.unsubscribe();
 
+    setupElasticClient();
     setupKafkaConsumer();
     setupKafkaProducer();
   }
 
+
+  private void setupElasticClient() {
+    mElasticClient = new RestHighLevelClient(
+            RestClient.builder(
+                    new HttpHost("localhost", 9200, "http")
+            ));
+  }
 
   private void setupKafkaProducer() {
     Map<String, String> kafkaConfig = new HashMap<>();
@@ -130,29 +134,36 @@ public class ApiVerticle extends MicroserviceVerticle {
   }
 
   private void searchRequest(String outputTopic, String index, String name) {
-    JsonObject searchConfig = new JsonObject()
-            .put("action", "search")
-            .put("_index", index)
-            .put("_type", "kafka-connect")
-            .put("query", new JsonObject()
-                    .put("match", new JsonObject()
-                            .put("name", name)
-                    )
-            );
+    SearchRequest searchRequest = new SearchRequest(index);
+    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("name", name);
+    searchSourceBuilder.query(matchQueryBuilder);
+    searchRequest.source(searchSourceBuilder);
 
-    vertx.eventBus().request("et.vertx.elasticsearch", searchConfig, ar -> {
-      if (ar.failed()) {
-        verror("Searching '" + name + "' in '" + index + "' index: " + ar.cause());
-        return;
+    ActionListener<SearchResponse> listener = new ActionListener<SearchResponse>() {
+      @Override
+      public void onResponse(SearchResponse searchResponse) {
+        SearchHit[] searchHits = searchResponse.getHits().getHits();
+        List<String> ids = new ArrayList<String>();
+        for (SearchHit hit : searchHits) {
+          Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+          ids.addAll((List<String>) sourceAsMap.get("timelapses"));
+        }
+
+        vsuccess("Searching " + name);
+        String outputMsg = new JsonObject()
+                .put("name", name)
+                .put("timelapses", new JsonArray(ids)).toString();
+        mProducer.write(KafkaProducerRecord.create(outputTopic, outputMsg));
       }
 
-      vsuccess("Searching '" + name + "' in '" + index + "' index");
-      mProducer.write(
-              KafkaProducerRecord.create(
-                      outputTopic,
-                      assembleHits((JsonObject) ar.result().body()).toString())
-      );
-    });
+      @Override
+      public void onFailure(Exception e) {
+        verror("Searching '" + name + "' " + e.getMessage());
+      }
+    };
+
+    mElasticClient.searchAsync(searchRequest, RequestOptions.DEFAULT, listener);
   }
 
   private JsonArray assembleHits(@Nonnull JsonObject whole) {

@@ -1,6 +1,6 @@
 {
   "kafka" : {
-    "host" : "10.50.5.1",
+    "host" : "localhost",
     "port" : "9092",
     "geoSearchTopic" : "geoSearchRequestTopic",
     "tagSearchTopic" : "tagSearchRequestTopic",

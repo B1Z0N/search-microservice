@@ -20,8 +20,8 @@ public class Config {
   private static final String TAG_OUTPUT_TOPIC = "tagOutputTopic";
 
   private static final String ELASTIC_SEARCH = "elasticsearch";
-  private static final String GEO_ELASTIC_SEARCH_INDEX = "geotopic";
-  private static final String TAG_ELASTIC_SEARCH_INDEX = "tagtopic";
+  private static final String GEO_ELASTIC_SEARCH_INDEX = "geoIndex";
+  private static final String TAG_ELASTIC_SEARCH_INDEX = "tagIndex";
 
   // Variables
 
@@ -71,9 +71,6 @@ public class Config {
             .put(GEO_ELASTIC_SEARCH_INDEX, mGeoIndex)
             .put(TAG_ELASTIC_SEARCH_INDEX, mTagIndex);
 
-    return new JsonObject()
-            .put(KAFKA, kafka)
-            .put(ELASTIC_SEARCH, elasticSearch);
     return new JsonObject()
             .put(KAFKA, kafka)
             .put(ELASTIC_SEARCH, elasticSearch);
