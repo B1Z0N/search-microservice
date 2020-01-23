@@ -1,3 +1,3 @@
 #!/bin/bash
 
-elasticsearch/bin/elasticsearch
+elasticsearch-7.5.2/bin/elasticsearch

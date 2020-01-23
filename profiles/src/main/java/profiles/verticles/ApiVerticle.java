@@ -1,5 +1,7 @@
 package profiles.verticles;
 
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 import io.vertx.kafka.client.common.TopicPartition;
 import io.vertx.kafka.client.consumer.KafkaConsumer;
 import io.vertx.kafka.client.producer.KafkaProducer;
@@ -31,6 +33,9 @@ public class ApiVerticle extends MicroserviceVerticle {
   private String mTagSearchTopic;
   private String mGeoOutputTopic;
   private String mTagOutputTopic;
+
+  private String mGeoIndex;
+  private String mTagIndex;
 
   // Overrides
 
@@ -82,13 +87,13 @@ public class ApiVerticle extends MicroserviceVerticle {
     mConsumer = KafkaConsumer.create(getVertx(), config);
     mConsumer.handler(record -> {
       vinfo("Handling record: " + record.topic() + "  " + ":" + record.value());
-      // 1. search request to elasticsearch
-      // 2. parsing it
-      // 3. output to outputTopic
+
       if (record.topic().equals(mGeoSearchTopic)) {
         // geo data is being searched
+        searchRequest(mGeoOutputTopic, mGeoIndex, record.value());
       } else {
         // tag data is being searched
+        searchRequest(mTagOutputTopic, mTagIndex, record.value());
       }
     });
 
@@ -107,12 +112,45 @@ public class ApiVerticle extends MicroserviceVerticle {
     });
   }
 
+  private void searchRequest(String outputTopic, String index, String name) {
+    JsonObject searchConfig = new JsonObject()
+            .put("action", "search")
+            .put("_index", index)
+            .put("_type", "kafka-connect")
+            .put("query", new JsonObject()
+                    .put("match", new JsonObject()
+                            .put("name", name)
+                    )
+            );
 
-//  private void sagas(String msg) {
-//    mSagasProducer.write(
-//            KafkaProducerRecord.create(mSagasTopic, msg)
-//    );
-//  }
+    vertx.eventBus().request("et.vertx.elasticsearch", searchConfig, ar -> {
+      if (ar.failed()) {
+        verror("Searching '" + name + "' in '" + index + "' index: " + ar.cause());
+        return;
+      }
+
+      vsuccess("Searching '" + name + "' in '" + index + "' index");
+      mProducer.write(
+              KafkaProducerRecord.create(
+                      outputTopic,
+                      assembleHits((JsonObject) ar.result().body()).toString())
+      );
+    });
+  }
+
+  private JsonArray assembleHits(@Nonnull JsonObject whole) {
+    JsonArray hits = whole.getJsonObject("hits").getJsonArray("hits");
+    JsonArray result = new JsonArray();
+    for (int i = 0; i < hits.size(); i++) {
+      JsonObject current = hits.getJsonObject(i);
+      result.addAll(
+              current.getJsonObject("_source")
+                      .getJsonArray("timelapses")
+      );
+    }
+
+    return result;
+  }
 
 
   /**

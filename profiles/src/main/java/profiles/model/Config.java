@@ -19,6 +19,10 @@ public class Config {
   private static final String GEO_OUTPUT_TOPIC = "geoOutputTopic";
   private static final String TAG_OUTPUT_TOPIC = "tagOutputTopic";
 
+  private static final String ELASTIC_SEARCH = "elasticsearch";
+  private static final String GEO_ELASTIC_SEARCH_INDEX = "geotopic";
+  private static final String TAG_ELASTIC_SEARCH_INDEX = "tagtopic";
+
   // Variables
 
   private final JsonObject mConfigObject;
@@ -30,6 +34,9 @@ public class Config {
   private final String mTagSearchTopic;
   private final String mGeoOutputTopic;
   private final String mTagOutputTopic;
+
+  private final String mGeoIndex;
+  private final String mTagIndex;
 
   // Constructors
 
@@ -43,6 +50,10 @@ public class Config {
     mTagSearchTopic = kafka.getString(TAG_SEARCH_TOPIC);
     mGeoOutputTopic = kafka.getString(GEO_OUTPUT_TOPIC);
     mTagOutputTopic = kafka.getString(TAG_OUTPUT_TOPIC);
+
+    JsonObject elasticSearch = config.getJsonObject(ELASTIC_SEARCH);
+    mGeoIndex = elasticSearch.getString(GEO_ELASTIC_SEARCH_INDEX);
+    mTagIndex = elasticSearch.getString(TAG_ELASTIC_SEARCH_INDEX);
   }
 
   // Public
@@ -56,8 +67,13 @@ public class Config {
             .put(GEO_OUTPUT_TOPIC, mGeoOutputTopic)
             .put(TAG_OUTPUT_TOPIC, mTagOutputTopic);
 
+    JsonObject elasticSearch = new JsonObject()
+            .put(GEO_ELASTIC_SEARCH_INDEX, mGeoIndex)
+            .put(TAG_ELASTIC_SEARCH_INDEX, mTagIndex);
+
     return new JsonObject()
-            .put(KAFKA, kafka);
+            .put(KAFKA, kafka)
+            .put(ELASTIC_SEARCH, elasticSearch);
   }
 
   // Accessors
@@ -89,4 +105,8 @@ public class Config {
   public String getTagOutputTopic() {
     return mTagOutputTopic;
   }
+
+  public String getGeoIndex() { return mGeoIndex; }
+
+  public String getTagIndex() { return mTagIndex; }
 }

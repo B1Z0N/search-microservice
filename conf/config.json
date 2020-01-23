@@ -6,5 +6,9 @@
     "tagSearchTopic" : "tagSearchRequestTopic",
     "geoOutputTopic" : "geoSearchOutputTopic",
     "tagOutputTopic" : "tagSearchOutputTopic"
+  },
+  "elasticsearch" : {
+    "geoIndex" : "geotopic",
+    "tagIndex" : "tagtopic"
   }
 }

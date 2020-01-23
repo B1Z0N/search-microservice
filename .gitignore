@@ -87,4 +87,4 @@ bin/
 .vertx
 file-uploads
 **/src/main/resources/*-js
-misc/elasticsearch
+misc/elasticsearch-7.5.2

@@ -28,6 +28,10 @@ subprojects {
         // kafka client
 
         compile 'io.vertx:vertx-kafka-client:3.8.4'
+
+        // elasticsearch client
+
+        compile 'com.englishtown.vertx:vertx-elasticsearch-service:2.2.0'
     }
 
     def generatedJavaOutputDir = "${buildDir.absolutePath}/generated/"
