@@ -74,6 +74,9 @@ public class Config {
     return new JsonObject()
             .put(KAFKA, kafka)
             .put(ELASTIC_SEARCH, elasticSearch);
+    return new JsonObject()
+            .put(KAFKA, kafka)
+            .put(ELASTIC_SEARCH, elasticSearch);
   }
 
   // Accessors

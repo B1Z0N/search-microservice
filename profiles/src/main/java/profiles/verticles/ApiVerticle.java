@@ -1,4 +1,14 @@
-package profiles.verticles;
+package scales.verticles;
+
+import io.vertx.kafka.client.common.TopicPartition;
+import io.vertx.kafka.client.consumer.KafkaConsumer;
+import io.vertx.kafka.client.producer.KafkaProducer;
+import io.vertx.kafka.client.producer.KafkaProducerRecord;
+import scales.model.Config;
+import scales.model.ConfigMessageCodec;
+import scales.model.OriginID;
+import scales.model.OriginID.photoType;
+import scales.model.OriginIDCodec;
 
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
@@ -16,8 +26,10 @@ import io.vertx.core.json.JsonObject;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-import static profiles.verticles.ConfigurationVerticle.EBA_CONFIG_FETCH;
-import static profiles.verticles.ConfigurationVerticle.EBA_CONFIG_UPDATE;
+import static scales.verticles.ConfigurationVerticle.EBA_CONFIG_FETCH;
+import static scales.verticles.ConfigurationVerticle.EBA_CONFIG_UPDATE;
+import static scales.verticles.ScaleVerticle.EBA_DELETE_ORIGIN;
+import static scales.verticles.ScaleVerticle.EBA_SCALE_ORIGIN;
 
 // verticle for communicating with kafka and internal implementation
 public class ApiVerticle extends MicroserviceVerticle {
