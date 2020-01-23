@@ -144,22 +144,23 @@ public class ApiVerticle extends MicroserviceVerticle {
       @Override
       public void onResponse(SearchResponse searchResponse) {
         SearchHit[] searchHits = searchResponse.getHits().getHits();
-        List<String> ids = new ArrayList<String>();
+        ArrayList<String> ids = new ArrayList<String>();
         for (SearchHit hit : searchHits) {
           Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-          ids.addAll((List<String>) sourceAsMap.get("timelapses"));
+          ids.addAll((ArrayList<String>) sourceAsMap.get("timelapses"));
         }
 
-        vsuccess("Searching " + name);
+        ids = new ArrayList<String>(new HashSet<String>(ids));
         String outputMsg = new JsonObject()
                 .put("name", name)
                 .put("timelapses", new JsonArray(ids)).toString();
+        vsuccess("Searching " + index + " '" + name + "': " + outputMsg);
         mProducer.write(KafkaProducerRecord.create(outputTopic, outputMsg));
       }
 
       @Override
       public void onFailure(Exception e) {
-        verror("Searching '" + name + "' " + e.getMessage());
+        verror("Searching " + index + " '" + name + "' " + e.getMessage());
       }
     };
 
